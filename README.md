@@ -12,8 +12,8 @@ To use the interfaces, simply run the corresponding Python program. However, the
 must therefore be modified prior to running the OptionsTRANUS.py or InterfaceVariationTRANUS.py programs. 
 You can also use these classes directly. An exemple on how to do that can be found in their main section, which use the config file in the same directory as the python files.
 
-The config file must be written in accordance to the following model :
-Location of TRANUS bin directory
-Location of the directory of the TRANUS project
-Code of which scenario of the TRANUS project you want to use
+The config file must be written in accordance to the following model :<br />
+Location of TRANUS bin directory<br />
+Location of the directory of the TRANUS project<br />
+Code of which scenario of the TRANUS project you want to use<br />
 One more line at the end, necessary for proper reading of the file, which can contain anything.
