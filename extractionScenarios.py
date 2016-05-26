@@ -46,9 +46,10 @@ def extractionScenarios(filePath):
 
 if __name__=='__main__':
     f = open("config","r")
-    tranusBinPath = (f.next()[:-1])
-    workingDirectory = (f.next()[:-1])
-    projectID = (f.next()[:-1])
+    lines = f.readlines()
+    tranusBinPath = lines[0].rstrip('\n')
+    workingDirectory = lines[1].rstrip('\n')
+    projectID = lines[2].rstrip('\n')
     r = extractionScenarios(os.path.join(workingDirectory, "W_TRANUS.CTL"))
     print r.listCodes
     print r.listNames
