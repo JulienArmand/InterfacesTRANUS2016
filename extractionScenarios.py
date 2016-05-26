@@ -26,20 +26,28 @@ def extractionScenarios(filePath):
     ['03A', '08A','08B','13A','13B']
     '''
     f = open(filePath,"r")
+    lines = f.readlines()
+    length_lines = len(lines)
+    for i in range(length_lines):
+        lines[i]=str.split(lines[i])
     #Advance until the 2.0 line
-    while not f.next()[0] is '2':
-        pass
-    f.next()
+    string = "2.0"
+    """ Getting the section line number within the file. """
+    for line in range(len(lines)):
+        if (lines[line][0] == string):
+            break
+    line+=2
     #The code and name go to two arrays of Strings named 'codeScenario' and 'nameScenario' respectively
     codeScenario = []
     nameScenario = []
     #Repeat the extraction of the code and name until reaching the *---- line
-    currentLine = f.next()
-    while not currentLine[0] is '*':
-        currentSplit = str.split(currentLine, "'")
-        codeScenario.append(currentSplit[1])
-        nameScenario.append(currentSplit[3])
-        currentLine = f.next()
+    currentLine = lines[line]
+    while not currentLine[0][0] is '*':
+        #We remove the 's in the names and codes
+        codeScenario.append(currentLine[0].replace("'",""))
+        nameScenario.append(currentLine[1].replace("'",""))
+        line+=1
+        currentLine = lines[line]
     #Creation of the object Scenarios for return
     result = Scenarios(codeScenario,nameScenario)
     return result
