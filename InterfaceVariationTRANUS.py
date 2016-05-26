@@ -58,9 +58,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         '''
         super(InterfaceVariationTRANUS, self).__init__()
         f = open(filepath,"r")
-        path = (f.next()[:-1])
-        directory = (f.next()[:-1])
-        IDproject = (f.next()[:-1])
+        lines = f.readlines()
+        path = lines[0].rstrip('\n')
+        directory = lines[1].rstrip('\n')
+        IDproject = lines[2].rstrip('\n')
         scenarios = extractionScenarios.extractionScenarios(os.path.join(directory, "W_TRANUS.CTL"))
         self.stockTranusConfig = TranusConfig(path,directory,IDproject,scenarios.listCodes[0])
         self.stockParam = LCALparam(self.stockTranusConfig)
@@ -268,10 +269,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         else :
             print("Beginning of execution for section 2.1 ...")
             '''We re-initialize the drop down lists used for the selection of which graph to plot.'''
-            self.DropDownListDisplaySector2_1.clear()
             self.DropDownListDisplayIter2_1.clear()
-            for n in range(len(self.stockParam.list_sectors)):
-                self.DropDownListDisplaySector2_1.addItem(self.stockParam.list_names_sectors[n])
+            if(self.generate2_1 == False):
+                for n in range(len(self.stockParam.list_sectors)):
+                    self.DropDownListDisplaySector2_1.addItem(self.stockParam.list_names_sectors[n])
             
             sector = self.DropDownListSector2_1.currentIndex()
             variable = self.DropDownListVariable2_1.currentIndex()
@@ -398,10 +399,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         else :
             print("Beginning of execution for section 2.2 ...")
             '''We re-initialize the drop down lists used for the selection of which graph to plot.'''
-            self.DropDownListDisplaySector2_2.clear()
             self.DropDownListDisplayIter2_2.clear()
-            for n in range(len(self.stockParam.list_sectors)):
-                self.DropDownListDisplaySector2_2.addItem(self.stockParam.list_names_sectors[n])
+            if(self.generate2_2 == False):
+                for n in range(len(self.stockParam.list_sectors)):
+                    self.DropDownListDisplaySector2_2.addItem(self.stockParam.list_names_sectors[n])
             sector = self.DropDownListSector_22.currentIndex()
             input = self.DropDownListInput2_2.currentIndex()
             variable = self.DropDownListVariable_22.currentIndex()
@@ -492,10 +493,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         else :
             print("Beginning of execution for section 2.3") 
             '''We re-initialize the drop down lists used for the selection of which graph to plot.'''
-            self.DropDownListDisplaySector2_3.clear()
             self.DropDownListDisplayIter2_3.clear()
-            for n in range(len(self.stockParam.list_sectors)):
-                self.DropDownListDisplaySector2_3.addItem(self.stockParam.list_names_sectors[n])
+            if(self.generate2_3 == False):
+                for n in range(len(self.stockParam.list_sectors)):
+                    self.DropDownListDisplaySector2_3.addItem(self.stockParam.list_names_sectors[n])
             sector = self.DropDownListSector2_3.currentIndex()
             input = self.DropDownListSubstitution.currentIndex()
             variable = self.DropDownListVariable2_3.currentIndex()
@@ -582,10 +583,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         '''
         print("Beginning of execution for section 3.2 ...")
         '''We re-initialize the drop down lists used for the selection of which graph to plot.'''
-        self.DropDownListDisplaySector3_2.clear()
         self.DropDownListDisplayIter3_2.clear()
-        for n in range(len(self.stockParam.list_sectors)):
-                self.DropDownListDisplaySector3_2.addItem(self.stockParam.list_names_sectors[n])
+        if(self.generate3_2 == False):
+                for n in range(len(self.stockParam.list_sectors)):
+                    self.DropDownListDisplaySector3_2.addItem(self.stockParam.list_names_sectors[n])
         sector = self.DropDownListSector3_2.currentIndex()
         input = self.DropDownListInput3_2.currentIndex()
         variable = self.DropDownListVariable3_2.currentIndex()
