@@ -236,8 +236,12 @@ class LcalInterface:
         if(freeze):
             print("Running lcal with freeze option activated")
             args = [program, self.tranusConf.scenarioId, "-f"]
+            print("argument")
+            print(args)
         else :
             args = [program, self.tranusConf.scenarioId]
+            print("argument")
+            print(args)
         result = subprocess.Popen(args, stdout=open(outlcal, "w"), stderr=open(outlcalerr, 'w'), cwd=self.tranusConf.workingDirectory).communicate() # Success!
         return 1
         
@@ -377,6 +381,20 @@ class LcalInterface:
         proc = subprocess.Popen(args, stdout=open(outimploc, 'w'), stderr=open(outimplocerr,'w'), cwd=self.tranusConf.workingDirectory).communicate()
         return 1
         
+    
+    def runImplocVariationSubDir(self, option, nameFile):
+        program = os.path.join(self.tranusConf.tranusBinPath,'imploc'+self.extension)
+        if not os.path.isfile(program):
+            logging.error('The <imploc> program was not found in %s'%self.tranusBinPath )
+            return 0
+        print(self.resultDirectory)
+        outimploc = os.path.join(self.resultDirectory, "outimploc"+option+".txt")
+        outimplocerr = os.path.join(self.resultDirectory, "outimploc"+option+"err.txt")
+        args = [program, self.tranusConf.scenarioId, "-"+option, "-o", nameFile, " "]
+        print(args)
+        proc = subprocess.Popen(args, stdout=open(outimploc, 'w'), stderr=open(outimplocerr,'w'), cwd=self.tranusConf.workingDirectory).communicate()
+        return 1
+    
     def runImplocVariation(self, option):
         program = os.path.join(self.tranusConf.tranusBinPath,'imploc'+self.extension)
         if not os.path.isfile(program):
@@ -389,7 +407,6 @@ class LcalInterface:
         args = [program, self.tranusConf.scenarioId, "-"+option, "-o", dir+"/IMPLOC_"+option+".MTX", " "]
         proc = subprocess.Popen(args, stdout=open(outimploc, 'w'), stderr=open(outimplocerr,'w'), cwd=self.tranusConf.workingDirectory).communicate()
         return 1
-    
     
     def runImptraOption(self, option):
         '''Creates the Imptra report with the indicated option from lcal'''
