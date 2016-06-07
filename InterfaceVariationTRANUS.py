@@ -63,8 +63,9 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         path = lines[0].rstrip('\n')
         directory = lines[1].rstrip('\n')
         IDproject = lines[2].rstrip('\n')
+        IDscenario = lines[3].rstrip('\n')
         scenarios = extractionScenarios.extractionScenarios(os.path.join(directory, "W_TRANUS.CTL"))
-        self.stockTranusConfig = TranusConfig(path,directory,IDproject,scenarios.listCodes[0])
+        self.stockTranusConfig = TranusConfig(path,directory,IDproject,IDscenario)
         self.stockParam = LCALparam(self.stockTranusConfig)
         self.generate2_1 = False
         self.generate2_2 = False
@@ -174,7 +175,6 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         print self.pathOutputDirectoryInstance
         if not os.path.exists(self.pathOutputDirectoryInstance):
             os.makedirs(self.pathOutputDirectoryInstance)
-        
     
     def updateVariable21(self):
         '''updateVariable21()
@@ -298,20 +298,28 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             '''Save of current value in order to restore the L1E file at the end of the method'''
             if(variable == 0):
                 self.savedOldValue = (self.stockParam.beta[sector])
+                nameNotes = "Notes_utility_lvl1.txt"
             if(variable == 1):
                 self.savedOldValue = (self.stockParam.list_utility_lvl2[sector])
+                nameNotes = "Notes_utility_lvl2.txt"
             if(variable == 2):
                 self.savedOldValue =(self.stockParam.lamda[sector])
+                nameNotes = "Notes_price_lvl1.txt"
             if(variable == 3):
                 self.savedOldValue = (self.stockParam.list_price_lvl2[sector])
+                nameNotes = "Notes_price_lvl2.txt"
             if(variable == 4):
                 self.savedOldValue = (self.stockParam.thetaLoc[sector])
+                nameNotes = "Notes_logit_scale.txt"
             if(variable == 5):
                 self.savedOldValue = (self.stockParam.alfa[sector])
+                nameNotes = "Notes_Attraction_factor.txt"
             if(variable == 6):
                 self.savedOldValue = (self.stockParam.list_price_cost_ratio[sector])
+                nameNotes = "Notes_Price_Cost_ratio.txt"
             if(variable == 7):
                 self.savedOldValue = (self.stockParam.list_sector_type[sector])
+                nameNotes = "Notes_Sector_Type.txt"
             
             min = self.MinValue2_1.value()
             max = self.MaxValue2_1.value()
@@ -322,6 +330,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             self.stockParam.nbIterations = self.NbIterLcal2_1.value()
             self.stockParam.convergenceFactor = 10**(-self.ConvFactor2_1.value())
             self.stockParam.smoothingFactor = self.SmoothingFactor2_1.value()
+            
+            #Creation of the file in which we will write the summary of the execution
+            filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
+            filer.write("Value of iteration, Mean, Std, Fit \n")
             
             for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -386,6 +398,16 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 matrix = pd.read_csv(outputPath)
                 resultPath = os.path.join(pathScenarioResultDirectory, "IMPLOC_J.MTX")
                 matrix.to_csv(resultPath, index = False)
+                #Copy of the L1E file in directory
+                nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
+                self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
+                #Writing of the interesting values in the Notes files. These values are : the iteration's value for the variable, fit, mean and std
+                mean = 0
+                std = 0
+                #Fit = somme du carre des valeurs absolues des differences production/demande
+                fit = 0
+                filer.write("{0}, {1}, {2}, {3} \n".format(str(currentValue), str(mean), str(std), str(fit)))
+                
                 
             
             '''Restoration of old value'''
@@ -414,6 +436,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             self.stockParam.write_L1E(self.stockTranusConfig)
             self.labelVariable2_1.setText(self.selectedVar2_1Text)
             self.generate2_1 = True
+            filer.close()
     
     def launch22(self):
         '''launch22()
@@ -445,10 +468,13 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             #Save of current value
             if(variable == 0):
                 self.savedOldValue = (self.stockParam.demin[sector][input])
+                nameNotes = "Notes_MinsCons.txt"
             if(variable == 1):
                 self.savedOldValue = (self.stockParam.demax[sector][input])
+                nameNotes = "Notes_MaxCons.txt"
             if(variable == 2):
                 self.savedOldValue = (self.stockParam.delta[sector, input])
+                nameNotes = "Notes_Elasticity.txt"
             
             self.initialNbIterations = self.stockParam.nbIterations
             self.initialConvergenceFactor = self.stockParam.convergenceFactor
@@ -456,6 +482,9 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             self.stockParam.nbIterations = self.NbIterLcal2_2.value()
             self.stockParam.convergenceFactor = 10**(-self.ConvFactor2_2.value())
             self.stockParam.smoothingFactor = self.SmoothingFactor2_2.value()
+            
+            #Creation of the file in which we will write the summary of the execution
+            filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
             
             for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -503,6 +532,9 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 matrix = pd.read_csv(outputPath)
                 resultPath = os.path.join(pathScenarioResultDirectory, "IMPLOC_J.MTX")
                 matrix.to_csv(resultPath, index = False)
+                #Copy of the L1E file in directory
+                nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
+                self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
             
             '''Restoration of old value'''
             if(variable == 0):
@@ -520,6 +552,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             self.stockParam.write_L1E(self.stockTranusConfig)
             self.labelVariable2_2.setText(self.selectedVar2_2Text)
             self.generate2_2 = True
+            filer.close()
         
     def launch23(self):
         '''launch23()
@@ -551,10 +584,13 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             #Save of current value
             if(variable == 0):
                 self.savedOldValue = (self.stockParam.sigma[sector])
+                nameNotes = "Notes_SustElast.txt"
             if(variable == 1):
                 self.savedOldValue = (self.stockParam.thetaSub[sector])
+                nameNotes = "Notes_LogitSc.txt"
             if(variable == 2):
                 self.savedOldValue = (self.stockParam.omega[sector, input])
+                nameNotes = "Notes_Penal.txt"
             
             self.initialNbIterations = self.stockParam.nbIterations
             self.initialConvergenceFactor = self.stockParam.convergenceFactor
@@ -562,6 +598,9 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             self.stockParam.nbIterations = self.NbIterLcal2_3.value()
             self.stockParam.convergenceFactor = 10**(-self.ConvFactor2_3.value())
             self.stockParam.smoothingFactor = self.SmoothingFactor2_3.value()
+            
+            #Creation of the file in which we will write the summary of the execution
+            filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
             
             for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -609,7 +648,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 outputPath = os.path.join(self.stockTranusConfig.workingDirectory, nameFile)
                 matrix = pd.read_csv(outputPath)
                 resultPath = os.path.join(pathScenarioResultDirectory, "IMPLOC_J.MTX")
-                matrix.to_csv(resultPath, index = False)    
+                matrix.to_csv(resultPath, index = False)
+                #Copy of the L1E file in directory
+                nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
+                self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)                
             
             '''Restoration of old value'''
             if(variable == 0):
@@ -628,6 +670,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             self.stockParam.write_L1E(self.stockTranusConfig)
             self.labelVariable2_3.setText(self.selectedVar2_3Text)
             self.generate2_3 = True
+            filer.close()
             
     def launch32(self):
         '''launch32()
@@ -652,6 +695,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         '''Save of current value in order to restore the L1E file at the end of the method'''
         #For now, there is only one variable possible : Level 1
         self.savedOldValue = (self.stockParam.bkn[sector, input])
+        nameNotes = "Notes_Lvl1.txt"
         self.selectedVar3_2Text = self.DropDownListVariable3_2.currentText()
         
         self.initialNbIterations = self.stockParam.nbIterations
@@ -660,6 +704,9 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         self.stockParam.nbIterations = self.NbIterLcal3_2.value()
         self.stockParam.convergenceFactor = 10**(-self.ConvFactor3_2.value())
         self.stockParam.smoothingFactor = self.SmoothingFactor3_2.value()
+        
+        #Creation of the file in which we will write the summary of the execution
+        filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
         
         for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -695,7 +742,10 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 outputPath = os.path.join(self.stockTranusConfig.workingDirectory, nameFile)
                 matrix = pd.read_csv(outputPath)
                 resultPath = os.path.join(pathScenarioResultDirectory, "IMPLOC_J.MTX")
-                matrix.to_csv(resultPath, index = False)     
+                matrix.to_csv(resultPath, index = False)
+                #Copy of the L1E file in directory
+                nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
+                self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
         
         '''Restoration of the initial configuration of the L1E file (number of iterations, convergence factor, smoothing factor)'''
         self.stockParam.nbIterations = self.initialNbIterations
@@ -706,6 +756,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         self.stockParam.write_L1E(self.stockTranusConfig)
         self.labelVariable3_2.setText(self.selectedVar3_2Text)
         self.generate3_2 = True
+        filer.close()
     
     def on_closing(self):
         '''on_closing()
@@ -758,10 +809,11 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     matrix3 = matrix2[matrix2["Sector"].str.contains(nameSector) == True]
                     matrix4 = matrix3[matrix3["Zone"].str.contains("ext_") == False]
                     y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
                     #Calcul of mean and variance and addition to stringData
-                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_1.itemText(i), y.mean(0))
+                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_1.itemText(i), z.mean(0))
                     stringData = stringData + average
-                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_1.itemText(i), y.var(0))
+                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_1.itemText(i), z.var(0))
                     stringData = stringData + variance
 
                 tkMessageBox.showinfo(stringTitle, stringData)
@@ -807,10 +859,11 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     matrix3 = matrix2[matrix2["Sector"].str.contains(nameSector) == True]
                     matrix4 = matrix3[matrix3["Zone"].str.contains("ext_") == False]
                     y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
                     #Calcul of mean and variance and addition to stringData
-                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_2.itemText(i), y.mean(0))
+                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_2.itemText(i), z.mean(0))
                     stringData = stringData + average
-                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_2.itemText(i), y.var(0))
+                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_2.itemText(i), z.var(0))
                     stringData = stringData + variance
 
                 tkMessageBox.showinfo(stringTitle, stringData)
@@ -855,10 +908,11 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     matrix3 = matrix2[matrix2["Sector"].str.contains(nameSector) == True]
                     matrix4 = matrix3[matrix3["Zone"].str.contains("ext_") == False]
                     y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
                     #Calcul of mean and variance and addition to stringData
-                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_3.itemText(i), y.mean(0))
+                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_3.itemText(i), z.mean(0))
                     stringData = stringData + average
-                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_3.itemText(i), y.var(0))
+                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter2_3.itemText(i), z.var(0))
                     stringData = stringData + variance
 
                 tkMessageBox.showinfo(stringTitle, stringData)
@@ -903,10 +957,11 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     matrix3 = matrix2[matrix2["Sector"].str.contains(nameSector) == True]
                     matrix4 = matrix3[matrix3["Zone"].str.contains("ext_") == False]
                     y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
                     #Calcul of mean and variance and addition to stringData
-                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter3_2.itemText(i), y.mean(0))
+                    average ="Mean for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter3_2.itemText(i), z.mean(0))
                     stringData = stringData + average
-                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter3_2.itemText(i), y.var(0))
+                    variance = "Variance for iteration {0} = {1}\n" .format(self.DropDownListDisplayIter3_2.itemText(i), z.var(0))
                     stringData = stringData + variance
 
                 tkMessageBox.showinfo(stringTitle, stringData)
