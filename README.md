@@ -16,4 +16,5 @@ The config file must be written in accordance to the following model :<br />
 Location of TRANUS bin directory<br />
 Location of the directory of the TRANUS project<br />
 Code of the TRANUS project<br />
+Code of the scenario within that project <br />
 One more line at the end, necessary for proper reading of the file, which can contain anything.
