@@ -333,7 +333,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             
             #Creation of the file in which we will write the summary of the execution
             filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
-            filer.write("Value of iteration, Mean, Std, Fit \n")
+            filer.write("Value of iteration, Sector, Mean, Std, Fit \n")
             
             for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -401,15 +401,31 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 #Copy of the L1E file in directory
                 nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
                 self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
-                #Writing of the interesting values in the Notes files. These values are : the iteration's value for the variable, fit, mean and std
-                mean = 0
-                std = 0
-                #Fit = somme du carre des valeurs absolues des differences production/demande
-                fit = 0
-                filer.write("{0}, {1}, {2}, {3} \n".format(str(currentValue), str(mean), str(std), str(fit)))
-                
-                
-            
+                matrix.columns = ["Scen", "Sector", "Zone", "TotProd", "TotDem", "ProdCost", "Price", "MinRes", "MaxRes", "Adjust"]
+                #Removal of the noise (production equal to zero => adjust equal to zero)
+                matrix.Adjust[matrix.TotProd == 0] = 0
+                matrix.Adjust[matrix.Price == 0] = 0
+                #Change of null price to None, to avoid anomalies perturbing the result
+                matrix.Price[matrix.Price == 0] = None
+                matrix2 = matrix[["Sector","Zone", "Price", "Adjust"]]
+                #Writing of the interesting values in the Notes files. These values are : the iteration's value for the variable, fit, mean and std for each sector
+                for n in range(len(self.stockParam.list_sectors)):
+                    #Isolation of the data for the sector selected
+                    nameSector = str(self.stockParam.list_sectors[n])+" "+(self.stockParam.list_names_sectors[n])
+                    matrix3 = matrix[matrix["Zone"].str.contains("ext_") == False]
+                    matrix4 = matrix3[matrix3["Sector"].str.contains(nameSector) == True]
+                    y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
+                    mean = z.mean(0)
+                    std = z.std(0)
+                    #Fit = sum of the square of the difference between production and demand
+                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    p = (prod - demand)
+                    p = p*p
+                    fit = p.sum()
+                    filer.write("{0}, {1}, {2}, {3}, {4} \n".format(str(currentValue), nameSector, str(mean), str(std), str(fit)))
+ 
             '''Restoration of old value'''
             if(variable == 0):
                 self.stockParam.beta[sector] = self.savedOldValue
@@ -485,6 +501,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             
             #Creation of the file in which we will write the summary of the execution
             filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
+            filer.write("Value of iteration, Sector, Mean, Std, Fit \n")
             
             for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -535,6 +552,30 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 #Copy of the L1E file in directory
                 nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
                 self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
+                matrix.columns = ["Scen", "Sector", "Zone", "TotProd", "TotDem", "ProdCost", "Price", "MinRes", "MaxRes", "Adjust"]
+                #Removal of the noise (production equal to zero => adjust equal to zero)
+                matrix.Adjust[matrix.TotProd == 0] = 0
+                matrix.Adjust[matrix.Price == 0] = 0
+                #Change of null price to None, to avoid anomalies perturbing the result
+                matrix.Price[matrix.Price == 0] = None
+                matrix2 = matrix[["Sector","Zone", "Price", "Adjust"]]
+                #Writing of the interesting values in the Notes files. These values are : the iteration's value for the variable, fit, mean and std for each sector
+                for n in range(len(self.stockParam.list_sectors)):
+                    #Isolation of the data for the sector selected
+                    nameSector = str(self.stockParam.list_sectors[n])+" "+(self.stockParam.list_names_sectors[n])
+                    matrix3 = matrix[matrix["Zone"].str.contains("ext_") == False]
+                    matrix4 = matrix3[matrix3["Sector"].str.contains(nameSector) == True]
+                    y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
+                    mean = z.mean(0)
+                    std = z.std(0)
+                    #Fit = sum of the square of the difference between production and demand
+                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    p = (prod - demand)
+                    p = p*p
+                    fit = p.sum()
+                    filer.write("{0}, {1}, {2}, {3}, {4} \n".format(str(currentValue), nameSector, str(mean), str(std), str(fit)))
             
             '''Restoration of old value'''
             if(variable == 0):
@@ -601,6 +642,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
             
             #Creation of the file in which we will write the summary of the execution
             filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
+            filer.write("Value of iteration, Sector, Mean, Std, Fit \n")
             
             for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -651,7 +693,31 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 matrix.to_csv(resultPath, index = False)
                 #Copy of the L1E file in directory
                 nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
-                self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)                
+                self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
+                matrix.columns = ["Scen", "Sector", "Zone", "TotProd", "TotDem", "ProdCost", "Price", "MinRes", "MaxRes", "Adjust"]
+                #Removal of the noise (production equal to zero => adjust equal to zero)
+                matrix.Adjust[matrix.TotProd == 0] = 0
+                matrix.Adjust[matrix.Price == 0] = 0
+                #Change of null price to None, to avoid anomalies perturbing the result
+                matrix.Price[matrix.Price == 0] = None
+                matrix2 = matrix[["Sector","Zone", "Price", "Adjust"]]
+                #Writing of the interesting values in the Notes files. These values are : the iteration's value for the variable, fit, mean and std for each sector
+                for n in range(len(self.stockParam.list_sectors)):
+                    #Isolation of the data for the sector selected
+                    nameSector = str(self.stockParam.list_sectors[n])+" "+(self.stockParam.list_names_sectors[n])
+                    matrix3 = matrix[matrix["Zone"].str.contains("ext_") == False]
+                    matrix4 = matrix3[matrix3["Sector"].str.contains(nameSector) == True]
+                    y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
+                    mean = z.mean(0)
+                    std = z.std(0)
+                    #Fit = sum of the square of the difference between production and demand
+                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    p = (prod - demand)
+                    p = p*p
+                    fit = p.sum()
+                    filer.write("{0}, {1}, {2}, {3}, {4} \n".format(str(currentValue), nameSector, str(mean), str(std), str(fit)))
             
             '''Restoration of old value'''
             if(variable == 0):
@@ -707,6 +773,7 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
         
         #Creation of the file in which we will write the summary of the execution
         filer = open(os.path.join(self.pathOutputDirectoryInstance, nameNotes), 'w')
+        filer.write("Value of iteration, Sector, Mean, Std, Fit \n")
         
         for i in range(nbIterations):  
                 #Calcul of value for this iteration
@@ -746,6 +813,30 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                 #Copy of the L1E file in directory
                 nameFileL1E = os.path.join(pathScenarioResultDirectory, str(currentValue)+".L1E")
                 self.stockParam.copy_L1E(nameFileL1E,self.stockTranusConfig)
+                matrix.columns = ["Scen", "Sector", "Zone", "TotProd", "TotDem", "ProdCost", "Price", "MinRes", "MaxRes", "Adjust"]
+                #Removal of the noise (production equal to zero => adjust equal to zero)
+                matrix.Adjust[matrix.TotProd == 0] = 0
+                matrix.Adjust[matrix.Price == 0] = 0
+                #Change of null price to None, to avoid anomalies perturbing the result
+                matrix.Price[matrix.Price == 0] = None
+                matrix2 = matrix[["Sector","Zone", "Price", "Adjust"]]
+                #Writing of the interesting values in the Notes files. These values are : the iteration's value for the variable, fit, mean and std for each sector
+                for n in range(len(self.stockParam.list_sectors)):
+                    #Isolation of the data for the sector selected
+                    nameSector = str(self.stockParam.list_sectors[n])+" "+(self.stockParam.list_names_sectors[n])
+                    matrix3 = matrix[matrix["Zone"].str.contains("ext_") == False]
+                    matrix4 = matrix3[matrix3["Sector"].str.contains(nameSector) == True]
+                    y = matrix4["Price"].convert_objects(convert_numeric=True)
+                    z = (matrix4["Adjust"].convert_objects(convert_numeric=True)*y)/100 + y
+                    mean = z.mean(0)
+                    std = z.std(0)
+                    #Fit = sum of the square of the difference between production and demand
+                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    p = (prod - demand)
+                    p = p*p
+                    fit = p.sum()
+                    filer.write("{0}, {1}, {2}, {3}, {4} \n".format(str(currentValue), nameSector, str(mean), str(std), str(fit)))
         
         '''Restoration of the initial configuration of the L1E file (number of iterations, convergence factor, smoothing factor)'''
         self.stockParam.nbIterations = self.initialNbIterations
