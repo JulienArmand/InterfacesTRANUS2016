@@ -419,8 +419,8 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     mean = z.mean(0)
                     std = z.std(0)
                     #Fit = sum of the square of the difference between production and demand
-                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
-                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    prod = matrix4["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix4["TotDem"].convert_objects(convert_numeric=True)
                     p = (prod - demand)
                     p = p*p
                     fit = p.sum()
@@ -570,8 +570,8 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     mean = z.mean(0)
                     std = z.std(0)
                     #Fit = sum of the square of the difference between production and demand
-                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
-                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    prod = matrix4["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix4["TotDem"].convert_objects(convert_numeric=True)
                     p = (prod - demand)
                     p = p*p
                     fit = p.sum()
@@ -712,8 +712,8 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     mean = z.mean(0)
                     std = z.std(0)
                     #Fit = sum of the square of the difference between production and demand
-                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
-                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    prod = matrix4["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix4["TotDem"].convert_objects(convert_numeric=True)
                     p = (prod - demand)
                     p = p*p
                     fit = p.sum()
@@ -831,8 +831,8 @@ class InterfaceVariationTRANUS(QtGui.QMainWindow, InterfaceVariationTRANUSUI.Ui_
                     mean = z.mean(0)
                     std = z.std(0)
                     #Fit = sum of the square of the difference between production and demand
-                    prod = matrix3["TotProd"].convert_objects(convert_numeric=True)
-                    demand = matrix3["TotDem"].convert_objects(convert_numeric=True)
+                    prod = matrix4["TotProd"].convert_objects(convert_numeric=True)
+                    demand = matrix4["TotDem"].convert_objects(convert_numeric=True)
                     p = (prod - demand)
                     p = p*p
                     fit = p.sum()
