@@ -18,3 +18,5 @@ Location of the directory of the TRANUS project<br />
 Code of the TRANUS project<br />
 Code of the scenario within that project <br />
 One more line at the end, necessary for proper reading of the file, which can contain anything.
+
+The executable file for InterfaceVariationTRANUS was created using pyinstaller. It hasn't been tested properly as of yet.
